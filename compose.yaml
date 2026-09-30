@@ -1,0 +1,55 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: onboard-path-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: onboardpath-root-internal
+      MYSQL_DATABASE: onboarding_db
+      MYSQL_USER: onboard
+      MYSQL_PASSWORD: onboardpath-internal
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  app:
+    image: ghcr.io/mzl1990163-spec/onboard-path:latest
+    container_name: onboard-path-app
+    restart: unless-stopped
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_USER: onboard
+      MYSQL_PASSWORD: onboardpath-internal
+      MYSQL_DB: onboarding_db
+      BOOTSTRAP_ADMIN_USERNAME: admin
+      BOOTSTRAP_ADMIN_PASSWORD: ChangeMe123!
+      COOKIE_SECURE: "false"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8001:8000"
+    volumes:
+      - app_data:/data
+      - uploads_data:/app/uploads
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/public/config', timeout=5)"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+volumes:
+  mysql_data:
+  app_data:
+  uploads_data:
+

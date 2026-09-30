@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlalchemy
+pymysql
+pydantic
+bleach
+python-multipart
+ldap3
+cryptography

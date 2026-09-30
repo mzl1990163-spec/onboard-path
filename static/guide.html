@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>团队办公自助办理与导航手册</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f8fafc;color:#334155;height:100vh;overflow:hidden}.app{display:flex;flex-direction:column;height:100vh}header{background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;padding:25px 46px;display:flex;align-items:center;justify-content:space-between;background-size:cover;background-position:center}.title{display:flex;align-items:center;gap:14px}.title .icon{font-size:32px}.title h1{font-size:25px;margin:0;background:linear-gradient(90deg,#fff,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.subtitle{font-size:13px;color:#94a3b8;margin-top:6px}.welcome{background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.28);color:#7dd3fc;padding:9px 17px;border-radius:999px;font-size:14px}.tabs{background:#fff;border-bottom:2px solid #e2e8f0;display:flex;overflow-x:auto;flex-shrink:0}.tab{flex:1;min-width:180px;padding:18px;border:0;border-bottom:4px solid transparent;background:#fff;color:#64748b;font-weight:650;font-size:15px;cursor:pointer}.tab:hover{background:#f8fafc;color:#0284c7}.tab.active{color:#0284c7;border-bottom-color:#0284c7}.body{display:flex;flex:1;min-height:0}.sidebar{width:355px;background:#fff;border-right:1px solid #e2e8f0;overflow-y:auto;flex-shrink:0}.doc-link{padding:17px 24px;border:0;border-bottom:1px solid #f1f5f9;border-left:4px solid transparent;background:#fff;width:100%;text-align:left;color:#475569;font-size:15px;cursor:pointer}.doc-link:hover{background:#f1f5f9;color:#0284c7}.doc-link.active{background:#e0f2fe;color:#0369a1;border-left-color:#0284c7;font-weight:650}.content{flex:1;background:#fff;overflow-y:auto;padding:42px 60px}.article{max-width:1050px;margin:auto}.article h2{font-size:27px;color:#0f172a;margin:0 0 25px;padding-bottom:17px;border-bottom:2px solid #e2e8f0}.rich{font-size:16px;line-height:1.85}.rich h3,.rich h4{color:#0f172a;margin-top:26px}.rich a{color:#0284c7}.rich img{max-width:100%;border-radius:8px}.rich code{background:#f1f5f9;padding:2px 6px;border-radius:4px}.rich blockquote{margin:22px 0;padding:16px 20px;border-left:4px solid #38bdf8;background:#f0f9ff;border-radius:0 8px 8px 0}.rich blockquote footer{margin-top:8px;color:#64748b;font-size:13px}.rich pre{background:#0f172a;color:#e2e8f0;padding:18px;border-radius:8px;overflow:auto}.rich figure{text-align:center;margin:24px 0}.rich figure img{max-height:620px;object-fit:contain}.rich figcaption{color:#64748b;font-size:13px;margin-top:7px}.doc-warning{background:#fffbeb;border:1px solid #fde68a;border-left:5px solid #f59e0b;padding:16px 19px;border-radius:8px;margin:20px 0}.doc-warning p{margin:7px 0 0}.doc-table-wrap{overflow-x:auto;margin:20px 0}.rich table{width:100%;border-collapse:collapse}.rich th,.rich td{border:1px solid #cbd5e1;padding:10px 12px;text-align:left}.rich th{background:#f1f5f9}.download{margin-top:28px;padding:18px;border:1px solid #bae6fd;background:#f0f9ff;border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:20px}.download a,.source-link{display:inline-block;background:#0284c7;color:#fff;text-decoration:none;padding:9px 14px;border-radius:7px;font-weight:650}.source-link{margin-top:20px;background:#f1f5f9;color:#0369a1}.empty{margin:auto;text-align:center;color:#94a3b8}.empty strong{display:block;font-size:22px;color:#475569;margin-bottom:10px}@media(max-width:800px){header{padding:18px 20px}.welcome{display:none}.title h1{font-size:19px}.sidebar{width:230px}.content{padding:28px 24px}.tab{min-width:150px}}
+</style>
+</head>
+<body><div class="app">
+<header id="header"><div><div class="title"><span class="icon">🧭</span><h1 id="headerTitle">团队办公自助办理与导航手册</h1></div><div class="subtitle" id="headerSubtitle">入职指引 & 办公环境全流程配置地图</div></div><div class="welcome" id="welcome"></div></header>
+<nav class="tabs" id="tabs"></nav>
+<div class="body"><aside class="sidebar" id="docList"></aside><main class="content" id="content"><div class="empty"><strong>正在加载</strong>请稍候...</div></main></div>
+</div>
+<script>
+const saved=sessionStorage.getItem('userInfo');
+if(!saved)location.replace('/');
+const user=JSON.parse(saved||'{}');
+let categories=[];
+const safeUrl=value=>{if(!value||!/^https?:\/\//i.test(value))return '';try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)?u.href:''}catch{return ''}};
+const safeBgUrl=value=>value&&(/^https?:\/\//i.test(value)||value.startsWith('/uploads/'))?value.replace(/["\\]/g,''):'';
+const hexToRgba=(hex,opacity)=>{const v=/^#[0-9a-f]{6}$/i.test(hex||'')?hex.slice(1):'0f172a';return `rgba(${parseInt(v.slice(0,2),16)},${parseInt(v.slice(2,4),16)},${parseInt(v.slice(4,6),16)},${Math.min(100,Math.max(0,Number(opacity)||0))/100})`};
+function showEmpty(title,text){document.getElementById('tabs').innerHTML='';document.getElementById('docList').innerHTML='';document.getElementById('content').innerHTML=`<div class="empty"><strong>${title}</strong>${text}</div>`}
+async function init(){
+document.getElementById('welcome').textContent=user.adminPreview?`👁 管理员预览：${user.departmentName} · ${user.positionName}`:`✨ 欢迎加入：${user.username}（${user.departmentName} · ${user.positionName}）`;
+  try{
+    const [cfgRes,stepsRes]=await Promise.all([fetch('/api/public/config'),fetch(`/api/public/steps?position_id=${encodeURIComponent(user.positionId)}`)]);
+    if(!cfgRes.ok||!stepsRes.ok)throw new Error('加载失败');
+    const cfg=(await cfgRes.json()).config; const data=await stepsRes.json();
+    document.getElementById('headerTitle').textContent=cfg.header_title||'团队办公自助办理与导航手册';
+    document.getElementById('headerSubtitle').textContent=cfg.header_subtitle||'';
+    const header=document.getElementById('header');header.style.backgroundColor=cfg.header_bg_color||'#0f172a';const bg=safeBgUrl(cfg.header_bg_url);header.style.backgroundImage=bg?`linear-gradient(${hexToRgba(cfg.header_overlay_color,cfg.header_overlay_opacity)},${hexToRgba(cfg.header_overlay_color,cfg.header_overlay_opacity)}),url("${bg}")`:'none';
+    document.getElementById('headerTitle').style.setProperty('-webkit-text-fill-color',cfg.header_title_color||'#ffffff');document.getElementById('headerTitle').style.color=cfg.header_title_color||'#ffffff';document.getElementById('headerSubtitle').style.color=cfg.header_subtitle_color||'#94a3b8';
+    categories=data.categories||[];
+    if(!categories.length)return showEmpty('暂无适用文档','当前部门和岗位尚未配置可见的入职文档。');
+    renderTabs();selectCategory(0);
+  }catch(e){showEmpty('内容加载失败','请刷新页面重试，或联系管理员。')}
+}
+function renderTabs(){const tabs=document.getElementById('tabs');tabs.innerHTML='';categories.forEach((cat,index)=>{const b=document.createElement('button');b.className='tab';b.textContent=`${index+1}. ${cat.category_name}`;b.onclick=()=>selectCategory(index);tabs.appendChild(b)})}
+function selectCategory(index){document.querySelectorAll('.tab').forEach((x,i)=>x.classList.toggle('active',i===index));const list=document.getElementById('docList');list.innerHTML='';categories[index].documents.forEach((doc,i)=>{const b=document.createElement('button');b.className='doc-link';b.textContent=`${index+1}.${i+1} ${doc.title}`;b.onclick=()=>selectDocument(index,i);list.appendChild(b)});selectDocument(index,0)}
+function selectDocument(catIndex,docIndex){document.querySelectorAll('.doc-link').forEach((x,i)=>x.classList.toggle('active',i===docIndex));const doc=categories[catIndex].documents[docIndex];const area=document.getElementById('content');area.innerHTML='';const article=document.createElement('article');article.className='article';const h=document.createElement('h2');h.textContent=doc.title;article.appendChild(h);const rich=document.createElement('div');rich.className='rich';rich.innerHTML=doc.content_html||'<p>该文档暂未填写正文。</p>';article.appendChild(rich);
+ if(doc.software){const box=document.createElement('div');box.className='download';const info=document.createElement('div');const strong=document.createElement('strong');strong.textContent=`📦 ${doc.software.name}`;info.appendChild(strong);info.appendChild(document.createTextNode(` · ${doc.software.sys||''}`));if(doc.software.extract_code){const p=document.createElement('div');p.style.marginTop='6px';p.textContent=`提取码/密码：${doc.software.extract_code}`;info.appendChild(p)}box.appendChild(info);const url=safeUrl(doc.software.download_url);if(url){const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';a.textContent='下载软件';box.appendChild(a)}article.appendChild(box)}
+ const ding=safeUrl(doc.dingtalk_url);if(ding){const a=document.createElement('a');a.className='source-link';a.href=ding;a.target='_blank';a.rel='noopener';a.textContent='在钉钉中打开原文档 ↗';article.appendChild(a)}area.appendChild(article);area.scrollTop=0}
+init();
+</script></body></html>

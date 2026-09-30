@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>新员工入职指引步骤</title>
+    <style>
+        body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:#f7f8fa; color:#1f2329; }
+        .header { padding:40px 20px; background:#0052d9; color:#fff; text-align:center; background-size:cover; background-position:center; }
+        .header h1 { margin:0 0 10px 0; font-size:28px; }
+        .header p { margin:0; opacity:0.9; font-size:15px; }
+        
+        .container { display:flex; gap:20px; padding:24px; max-width:1400px; margin:0 auto; box-sizing:border-box; }
+        .category-col { flex:1; background:#fff; border-radius:10px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); min-width:0; }
+        .category-col h3 { margin-top:0; border-bottom:2px solid #0052d9; padding-bottom:10px; color:#0052d9; font-size:18px; }
+        
+        .doc-item { margin-bottom:20px; border:1px solid #e5e6eb; border-radius:8px; padding:14px; background:#fafafa; }
+        .doc-item h4 { margin:0 0 8px 0; font-size:16px; color:#1d2129; }
+        .rich-text { font-size:14px; line-height:1.6; color:#4e5969; margin-bottom:10px; }
+        
+        .download-card { background:#e8f3ff; border:1px dashed #165dff; padding:10px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; font-size:13px; }
+        .download-btn { background:#165dff; color:#fff; text-decoration:none; padding:6px 12px; border-radius:4px; font-weight:500; }
+        .dingtalk-link { display:inline-block; margin-top:6px; font-size:13px; color:#0052d9; text-decoration:none; }
+    </style>
+</head>
+<body>
+    <div class="header" id="headerBox">
+        <h1 id="headerTitle">新员工入职落地指引</h1>
+        <p id="headerSubtitle">加载中...</p>
+    </div>
+
+    <div class="container" id="categoryContainer"></div>
+
+    <script>
+        const userStr = sessionStorage.getItem('userInfo');
+        if(!userStr) { window.location.href = '/'; }
+        const userInfo = JSON.parse(userStr);
+
+        fetch('/api/public/config').then(r=>r.json()).then(data => {
+            const cfg = data.config;
+            document.getElementById('headerTitle').innerText = cfg.header_title;
+            document.getElementById('headerSubtitle').innerText = cfg.header_subtitle;
+            if(cfg.header_bg_url) {
+                document.getElementById('headerBox').style.backgroundImage = `url(${cfg.header_bg_url})`;
+            }
+        });
+
+        fetch(`/api/public/steps?position_id=${userInfo.positionId}`).then(r=>r.json()).then(data => {
+            const container = document.getElementById('categoryContainer');
+            container.innerHTML = '';
+
+            data.categories.forEach(cat => {
+                const col = document.createElement('div');
+                col.className = 'category-col';
+                
+                let docsHtml = '';
+                cat.documents.forEach(doc => {
+                    let swHtml = '';
+                    if(doc.software) {
+                        swHtml = `
+                            <div class="download-card">
+                                <div>
+                                    <strong>📦 ${doc.software.name}</strong> (${doc.software.sys})
+                                    ${doc.software.extract_code ? `<br><span style="color:#86909c;">提取码/解压密码: <code style="background:#fff;padding:2px 4px;border-radius:3px;">${doc.software.extract_code}</code></span>` : ''}
+                                </div>
+                                <a href="${doc.software.download_url}" target="_blank" class="download-btn">内网网盘下载</a>
+                            </div>
+                        `;
+                    }
+
+                    let dingHtml = doc.dingtalk_url ? `<a href="${doc.dingtalk_url}" target="_blank" class="dingtalk-link">📄 在钉钉中打开原文档 ➔</a>` : '';
+
+                    docsHtml += `
+                        <div class="doc-item">
+                            <h4>${doc.title}</h4>
+                            <div class="rich-text">${doc.content_html || ''}</div>
+                            ${swHtml}
+                            ${dingHtml}
+                        </div>
+                    `;
+                });
+
+                col.innerHTML = `<h3>${cat.category_name}</h3>${docsHtml || '<p style="color:#86909c;font-size:13px;">暂无该岗位配置</p>'}`;
+                container.appendChild(col);
+            });
+        });
+    </script>
+</body>
+</html>
