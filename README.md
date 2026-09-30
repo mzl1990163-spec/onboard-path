@@ -58,7 +58,7 @@ docker compose ps
 
 ```text
 用户名：admin
-密码：ChangeMe123!
+密码：admin@123
 ```
 
 > **重要：** 首次登录管理后台后，请立即在“用户与权限”中修改初始管理员密码。
